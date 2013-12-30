@@ -47,6 +47,7 @@ class String
 end
 
 require 'ruby-mws/base'
+require 'ruby-mws/api/feeds'
 require 'ruby-mws/connection'
 require 'ruby-mws/exceptions'
 require 'ruby-mws/version'
@@ -58,5 +59,6 @@ require 'ruby-mws/api/inventory'
 require 'ruby-mws/api/order'
 require 'ruby-mws/api/report'
 require 'ruby-mws/api/query'
+require 'ruby-mws/api/reports'
 require 'ruby-mws/api/response'
 require 'ruby-mws/api/binary_response'

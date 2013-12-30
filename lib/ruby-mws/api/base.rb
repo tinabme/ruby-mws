@@ -1,6 +1,9 @@
 # This class serves as a parent class to the API classes.
 # It shares connection handling, query string building, ?? among the models.
 
+require 'digest'
+require 'base64'
+
 module MWS
   module API
 
@@ -40,7 +43,19 @@ module MWS
         params[:lists][:marketplace_id] = "MarketplaceId.Id"
 
         query = Query.new params
-        resp = self.class.send(params[:verb], query.request_uri)
+        #resp = self.class.send(params[:verb], query.request_uri)
+		
+		if $VERBOSE
+          puts "ruby-mws: Sending #{params[:verb].upcase} request to #{query.request_uri}. Options: #{query.http_options.inspect}"
+        end
+        resp = self.class.send(params[:verb], query.request_uri, query.http_options)
+
+        content_type = resp.headers['content-type']
+        if not content_type =~ /text\/xml/ || content_type =~ /application\/xml/ || content_type =~ /application\/octet-stream/
+          raise ErrorResponse, "Expected to receive XML response from Amazon MWS! Actually received: #{content_type}\nStatus: #{resp.response.code}\nBody: #{resp.body.size > 4000 ? resp.body[0...4000] + '...' : resp.body}"
+        end
+
+        return resp.parsed_response if resp.parsed_response.is_a?(String)
 
         @response = Response.parse resp, name, params
 
@@ -53,10 +68,12 @@ module MWS
       def default_params(name)
         {
           :action            => name.to_s.camelize,
+		  :verb				 => :get
           :signature_method  => 'HmacSHA256',
           :signature_version => '2',
           :timestamp         => Time.now.iso8601,
           :version           => '2009-01-01'
+		  :uri				 => '/'
         }
       end
 

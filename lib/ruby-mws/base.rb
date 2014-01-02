@@ -16,6 +16,10 @@ module MWS
       @inventory ||= MWS::API::Inventory.new(@connection)
     end
 
+    def fulfillment
+      @fulfillment ||= MWS::API::Fulfillment.new(@connection)
+    end
+
     def reports
       @reports ||= MWS::API::Report.new(@connection)
     end

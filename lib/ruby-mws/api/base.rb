@@ -68,11 +68,11 @@ module MWS
       def default_params(name)
         {
           :action            => name.to_s.camelize,
-		  :verb				 => :get
+		  :verb				 => :get,
           :signature_method  => 'HmacSHA256',
           :signature_version => '2',
           :timestamp         => Time.now.iso8601,
-          :version           => '2009-01-01'
+          :version           => '2009-01-01',
 		  :uri				 => '/'
         }
       end

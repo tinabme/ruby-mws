@@ -1,4 +1,5 @@
 require 'builder'
+require 'pry'
 
 module MWS
   module API
@@ -6,23 +7,13 @@ module MWS
     class Fulfillment < Base
       include Feeds
 
-      def_request [:list_inventory_supply, :list_inventory_supply_by_next_token],
-        :verb => :get,
-        :uri => '/FulfillmentInventory/2010-10-01',
-        :version => '2010-10-01',
-        :lists => {
-          :seller_skus => "SellerSkus.member"
-        },
-        :mods => [
-          lambda {|r| r.inventory_supply_list = [r.inventory_supply_list.member].flatten}
-        ]
 
-      # Takes an array of hash AmazonOrderID,FulfillmentDate,CarrierName,ShipperTrackingNumber,SKU,Quantity
-      # Returns true if all the orders were updated successfully
-      # Otherwise raises an exception
-      def post_ship_confirmation(merchant_id, hash)
+      ## Takes an array of hash AmazonOrderID,FulfillmentDate,CarrierName,ShipperTrackingNumber,sku,quantity
+      ## Returns true if all the orders were updated successfully
+      ## Otherwise raises an exception
+      def self.post_ship_confirmation(merchant_id, ship_info)
         # Shipping Confirmation is done by sending an XML "feed" to Amazon
-        
+
         xml = ""
         builder = Builder::XmlMarkup.new(:indent => 2, :target => xml)
         builder.instruct! # <?xml version="1.0" encoding="UTF-8"?>
@@ -31,25 +22,41 @@ module MWS
             head.DocumentVersion('1.01')
             head.MerchantIdentifier(merchant_id)
           end
+
           env.MessageType('OrderFulfillment')
           i = 0
-          hash.each do |sku,quantity|
+
+          ship_info.each do |shp|
             env.Message do |msg|
               msg.MessageID(i += 1)
-              msg.OperationType('Update')
-              msg.Inventory do |inv|
-                inv.SKU(sku)
-                inv.Quantity(quantity)
+              msg.OrderFulfillment do |orf|
+                orf.MerchantOrderID(shp.AmazonOrderID)
+                orf.MerchantFulfillmentID(shp.AmazonOrderID)
+                orf.FulfillmentDate(shp.FulfillmentDate)
+                orf.FulfillmentData do |fd|
+                  fd.CarrierCode(shp.CarrierCode)
+                  fd.ShippingMethod()
+                  fd.ShipperTrackingNumber(shp.ShipperTrackingNumber)
+                end
+                if shp.sku != ''
+                  orf.Item do |itm|
+                    itm.MerchantOrderItemID(shp.sku)
+                    itm.MerchantFulfillmentItemID(shp.sku)
+                    itm.Quantity(shp.quantity)
+                  end
+
+                end
+
+
               end
             end
           end
+
+          submit_feed('_POST_ORDER_FULFILLMENT_DATA_', xml)
+
         end
 
-        submit_feed('_POST_ORDER_FULFILLMENT_DATA_', xml)
       end
-
-      
     end
-
   end
 end

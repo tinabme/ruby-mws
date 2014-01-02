@@ -11,7 +11,7 @@ module MWS
       ## Takes an array of hash AmazonOrderID,FulfillmentDate,CarrierName,ShipperTrackingNumber,sku,quantity
       ## Returns true if all the orders were updated successfully
       ## Otherwise raises an exception
-      def self.post_ship_confirmation(merchant_id, ship_info)
+      def post_ship_confirmation(merchant_id, ship_info)
         # Shipping Confirmation is done by sending an XML "feed" to Amazon
 
         xml = ""

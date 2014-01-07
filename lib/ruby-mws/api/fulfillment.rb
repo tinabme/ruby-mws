@@ -1,5 +1,4 @@
 require 'builder'
-require 'pry'
 
 module MWS
   module API

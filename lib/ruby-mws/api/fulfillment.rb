@@ -51,9 +51,8 @@ module MWS
             end
           end
 
-          submit_feed('_POST_ORDER_FULFILLMENT_DATA_', xml)
-
         end
+		submit_feed('_POST_ORDER_FULFILLMENT_DATA_', xml)
 
       end
     end

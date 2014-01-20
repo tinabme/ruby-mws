@@ -5,8 +5,7 @@ module MWS
 
     class Fulfillment < Base
       include Feeds
-
-
+	  
       ## Takes an array of hash AmazonOrderID,FulfillmentDate,CarrierName,ShipperTrackingNumber,sku,quantity
       ## Returns true if all the orders were updated successfully
       ## Otherwise raises an exception
@@ -21,17 +20,14 @@ module MWS
             head.DocumentVersion('1.01')
             head.MerchantIdentifier(merchant_id)
           end
-
           env.MessageType('OrderFulfillment')
           i = 0
-
           ship_info.each do |shp|
             env.Message do |msg|
               msg.MessageID(i += 1)
               msg.OrderFulfillment do |orf|
-                orf.MerchantOrderID(shp.AmazonOrderID)
-                orf.MerchantFulfillmentID(shp.AmazonOrderID)
-                orf.FulfillmentDate(shp.FulfillmentDate)
+                orf.AmazonOrderID(shp.AmazonOrderID)
+				orf.FulfillmentDate(shp.FulfillmentDate)
                 orf.FulfillmentData do |fd|
                   fd.CarrierCode(shp.CarrierCode)
                   fd.ShippingMethod()
@@ -43,14 +39,10 @@ module MWS
                     itm.MerchantFulfillmentItemID(shp.sku)
                     itm.Quantity(shp.quantity)
                   end
-
                 end
-
-
               end
             end
           end
-
         end
 		submit_feed('_POST_ORDER_FULFILLMENT_DATA_', xml)
 

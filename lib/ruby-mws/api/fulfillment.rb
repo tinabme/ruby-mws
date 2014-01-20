@@ -27,7 +27,7 @@ module MWS
               msg.MessageID(i += 1)
               msg.OrderFulfillment do |orf|
                 orf.AmazonOrderID(shp.AmazonOrderID)
-			    orf.FulfillmentDate(shp.FulfillmentDate)
+			    orf.FulfillmentDate(shp.FulfillmentDate.to_time.iso8601)
                 orf.FulfillmentData do |fd|
                   fd.CarrierCode(shp.CarrierCode)
                   fd.ShippingMethod()

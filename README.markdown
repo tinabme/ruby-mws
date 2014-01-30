@@ -1,13 +1,17 @@
 ruby-mws
 ========
-
-by Erik Lyngved
+Originally Created by: Erik Lyngved   elyngved/ruby-mws
+Forked and updated by: Tina Barfield
 
 ### Read me!
 
-ruby-mws is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API. Right now it only supports Amazon's Order and Inventory APIs.
+ruby-mws is a Ruby gem that wraps the Amazon Marketplace Web Service (MWS) API.
 
-I made this gem for my own purposes, and it's not fully featured. Pull requests or bug reports are always welcome.
+This forked version of the ruby-mws gem combines enhancements from  Alex Dowad's  alexdowad/ruby-mws fork  to support the base Inventory Feed API. 
+And my additions to support the order fulfillment feeds _POST_ORDER_FULFILLMENT_DATA_ and add sale pricing options to the Inventory Pricing 
+feed _POST_PRODUCT_PRICING_DATA_. See Feeds section of Quick Start (below) for usage examples.
+
+This fork was generated for my own purposes, and it's not fully featured.
 
 Quick Start
 -----------
@@ -95,6 +99,25 @@ This object can be used to access all API services. Below are examples on how to
 
     `@mws.orders.list_order_items :amazon_order_id => "002-EXAMPLE-0031387"`
 
+
+### Feeds	
+
+* Products Inventory - Accepts a hash of product sku's and current available inventory (current_inventory_hash[sku] = quantity) to overwrite the inventory for matching item/sku's on Amazon
+	
+	@mws.inventory.update_inventory_supply('Your_Seller_Id',current_inventory_hash)
+	This submits using the `_POST_INVENTORY_AVAILABILITY_DATA_`
+
+* Products Prices - Accepts an array of hashs (sku,standard_price,sale_price,start_date,end_date) to overwrite the price/sale for matching item/sku's on Amazon. Note: If item is not on sale sale_price,start_date & end_date can be blank.
+	
+	@mws.inventory.update_inventory_supply('Your_Seller_Id','USD', current_price_Array)
+	This submits using the `_POST_PRODUCT_PRICING_DATA_`
+
+* Order Fulfillment - Accepts an array of hash objects (ActiveRecord results) (AmazonOrderID,FulfillmentDate,CarrierName,ShipperTrackingNumber,sku,quantity) to notify Amazon that items in an order have been shipped. Note:If all items in the order are shipped, sku and quantity can be blank.
+	
+	@mws.fulfillment.post_ship_confirmation('Your_Seller_Id','USD', shipped_Array)
+	This submits using the `_POST_ORDER_FULFILLMENT_DATA_`
+
+	
 ### Fulfillment Inventory API
 
 * ListInventorySupply - Returns availability of inventory, only returns items based on list of SKUs or last change date
@@ -102,6 +125,7 @@ This object can be used to access all API services. Below are examples on how to
     `@mws.inventory.list_inventory_supply :seller_skus => ['PF-5VZN-04XR', 'V4-03EY-LAL1', 'OC-TUKC-031P']`
     `@mws.inventory.list_inventory_supply :query_start_date_time => Time.now-1.day`
 
+	
 ### Reports API
 
 * RequestReport - Used to submit a request for a report by [report type](http://docs.developer.amazonservices.com/en_US/reports/Reports_ReportType.html). Returns report request info.
